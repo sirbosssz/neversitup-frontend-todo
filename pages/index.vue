@@ -5,7 +5,14 @@
 </template>
 
 <script setup lang="ts">
+  import { TodoRepository } from '~/repository/todo'
   definePageMeta({
     middleware: ['auth'],
   })
+
+  const todoRepo = new TodoRepository()
+  const { data, error, status, refresh } = await useAsyncData(() =>
+    todoRepo.getAll()
+  )
+  console.log(data.value)
 </script>
