@@ -21,10 +21,6 @@
 
       <LoginError :message="formError.login" />
 
-      <pre
-        >{{ formError }}
-      </pre>
-
       <button
         class="block w-full bg-lime-300 text-black p-2 my-4 rounded-md"
         type="submit"
@@ -39,7 +35,9 @@
 <script setup lang="ts">
   import { object, string } from 'yup'
   import { useForm, type GenericObject } from 'vee-validate'
+  import { AuthRepository } from '~/repository/auth'
 
+  // form validate
   const { defineField, handleSubmit, isSubmitting } = useForm({
     validationSchema: object({
       username: string().required('Required Username'),
@@ -52,6 +50,7 @@
   const [username] = defineField('username')
   const [password] = defineField('password')
 
+  // form error
   function useFormError() {
     type FormErrorKeys = 'username' | 'password' | 'login'
     type FormError = Record<FormErrorKeys, string>
@@ -75,33 +74,19 @@
   }
   const { formError, setFormError, resetFormError } = useFormError()
 
-  const submitLogin = async (values: GenericObject) => {
-    resetFormError()
-    const result = await $fetch('/api/auth/login', {
-      method: 'POST',
-      body: {
+  // login
+  const authRepo = new AuthRepository()
+  const onSubmit = handleSubmit(
+    (values: GenericObject) => {
+      resetFormError()
+      const body = {
         username: values.username,
         password: values.password,
-      },
-    }).catch((error) => {
-      setFormError({ login: error.data.message })
-    })
-
-    if (result) {
-      // set token
-      const token = result.access_token
-      const accessTokenCookie = useCookie('access_token', {
-        httpOnly: true,
-        secure: true,
-      })
-      accessTokenCookie.value = token
-
-      // redirect to index
-      await navigateTo('/')
-    }
-  }
-  const onSubmit = handleSubmit(
-    (values) => submitLogin(values),
+      }
+      const errorCallback = (message: string) =>
+        setFormError({ login: message })
+      authRepo.login(body, errorCallback)
+    },
     ({ errors }) => setFormError(errors)
   )
 </script>
