@@ -10,7 +10,7 @@
       :v-bind="attrs"
       @input="updateValue"
     />
-    <span v-if="error" class="text-red-600">{{ error }}</span>
+    <LoginError :message="error" />
   </div>
 </template>
 
@@ -33,12 +33,13 @@
       default: '',
     },
     modelValue: {
-      type: Object,
-      required: true,
+      type: String,
+      required: false,
     },
     error: {
       type: String,
-      default: '',
+      required: false,
+      default: ''
     },
     attrs: {},
   })

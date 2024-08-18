@@ -1,27 +1,29 @@
 <template>
   <div class="form-base bg-slate-300 dark:bg-slate-700 p-3 rounded-md">
     <form @submit.prevent="onSubmit">
-      <LoginInputGroup
+      <LoginInput
         label="Username"
         placeholder="Username"
         name="username"
         type="text"
-        :error="formError.username"
         v-model="username"
+        :error="formError.username"
       />
 
-      <LoginInputGroup
+      <LoginInput
         label="Password"
         placeholder="Password"
         name="password"
         type="password"
-        :error="formError.password"
         v-model="password"
+        :error="formError.password"
       />
 
-      <span v-if="formError.loginError" class="text-red-600">{{
-        formError.loginError
-      }}</span>
+      <LoginError :message="formError.login" />
+
+      <pre
+        >{{ formError }}
+      </pre>
 
       <button
         class="block w-full bg-lime-300 text-black p-2 my-4 rounded-md"
@@ -36,7 +38,7 @@
 
 <script setup lang="ts">
   import { object, string } from 'yup'
-  import { useForm } from 'vee-validate'
+  import { useForm, type GenericObject } from 'vee-validate'
 
   const { defineField, handleSubmit, isSubmitting } = useForm({
     validationSchema: object({
@@ -47,52 +49,60 @@
         .required('Required Password'),
     }),
   })
-
   const [username] = defineField('username')
   const [password] = defineField('password')
 
-  let formError = reactive({
-    username: '',
-    password: '',
-    loginError: '',
-  })
-  const setError = (errors: Partial<Record<string, string>>) => {
-    formError.username = errors.username ?? ''
-    formError.password = errors.password ?? ''
-  }
-  const resetError = () => {
-    formError.username = ''
-    formError.password = ''
-    formError.loginError = ''
-  }
+  function useFormError() {
+    type FormErrorKeys = 'username' | 'password' | 'login'
+    type FormError = Record<FormErrorKeys, string>
 
-  const onSubmit = handleSubmit(
-    async (values) => {
-      resetError()
-      const result = await $fetch('/api/auth/login', {
-        method: 'POST',
-        body: {
-          username: values.username,
-          password: values.password,
-        },
-      }).catch((error) => {
-        formError.loginError = error.data.message ?? ''
-      })
-
-      if (result) {
-        // set token
-        const token = result.access_token
-        const accessTokenCookie = useCookie('access_token')
-        accessTokenCookie.value = token
-
-        // redirect to index
-        const router = useRouter()
-        router.push('/')
-      }
-    },
-    ({ errors }) => {
-      setError(errors)
+    const initError: FormError = {
+      username: '',
+      password: '',
+      login: '',
     }
+    const formError = reactive<FormError>({ ...initError })
+    const setFormError = (errors: Partial<FormError>) => {
+      Object.keys(formError).forEach((key: string) => {
+        const errorKey = key as FormErrorKeys
+        formError[errorKey] = errors[errorKey] ?? ''
+      })
+    }
+    const resetFormError = () => {
+      Object.assign(formError, initError)
+    }
+    return { formError, setFormError, resetFormError }
+  }
+  const { formError, setFormError, resetFormError } = useFormError()
+
+  const submitLogin = async (values: GenericObject) => {
+    resetFormError()
+    const result = await $fetch('/api/auth/login', {
+      method: 'POST',
+      body: {
+        username: values.username,
+        password: values.password,
+      },
+    }).catch((error) => {
+      setFormError({ login: error.data.message })
+    })
+
+    if (result) {
+      // set token
+      const token = result.access_token
+      const accessTokenCookie = useCookie('access_token', {
+        httpOnly: true,
+        secure: true,
+      })
+      accessTokenCookie.value = token
+
+      // redirect to index
+      await navigateTo('/')
+    }
+  }
+  const onSubmit = handleSubmit(
+    (values) => submitLogin(values),
+    ({ errors }) => setFormError(errors)
   )
 </script>
 
