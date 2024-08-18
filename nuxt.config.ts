@@ -9,4 +9,7 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  runtimeConfig: {
+    apiUrl: 'https://candidate-assignment.neversitup.com',
+  },
 })
