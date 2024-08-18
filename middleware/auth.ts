@@ -1,5 +1,7 @@
+import { getAccessToken } from '~/composables/accessToken/getAccessToken'
+
 export default defineNuxtRouteMiddleware((to) => {
-  const accessToken = useCookie('access_token')
+  const accessToken = getAccessToken()
 
   if (!accessToken.value) {
     return '/login'

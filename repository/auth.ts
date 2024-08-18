@@ -1,3 +1,5 @@
+import { getAccessToken } from '~/composables/accessToken/getAccessToken'
+
 type AuthUser = {
   username: string
   access_token: string
@@ -28,10 +30,7 @@ export class AuthRepository {
 
   private async saveToken(token: string): Promise<void> {
     // set token
-    const accessTokenCookie = useCookie('access_token', {
-      httpOnly: true,
-      secure: true,
-    })
+    const accessTokenCookie = getAccessToken()
     accessTokenCookie.value = token
 
     // redirect to index
