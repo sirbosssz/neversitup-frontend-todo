@@ -19,10 +19,6 @@ export class AuthRepository {
       method: 'POST',
       body,
       async onResponseError({ response }) {
-        console.log({
-          message: response._data.message,
-          response,
-        })
         errorCallback(response._data.message)
       },
     })
