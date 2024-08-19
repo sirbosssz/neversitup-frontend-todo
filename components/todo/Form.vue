@@ -24,12 +24,9 @@
 
     <div v-if="!isSubmitting" class="mt-4 flex gap-3">
       <ButtonPrimary type="submit"> {{ submitButtonMessage }} </ButtonPrimary>
-      <ButtonSecondary @click="$emit('closeModal')"> Close </ButtonSecondary>
+      <ButtonSecondary @click="closeForm"> Close </ButtonSecondary>
     </div>
     <div v-else class="mt-4 block text-center">Submitting...</div>
-
-    <pre>{{ formData }}</pre>
-    <pre>{{ title }}</pre>
   </form>
 </template>
 
@@ -104,9 +101,24 @@
 
         case TodoFormMode.EDIT:
           await todoRepo.edit(props.id, formData)
+          navigateTo('/')
           break
       }
     },
     ({ errors }) => setFormError(errors)
   )
+
+  // close
+
+  const closeForm = () => {
+    switch (props.mode) {
+      case TodoFormMode.CREATE:
+        emit('closeModal')
+        break
+
+      case TodoFormMode.EDIT:
+        navigateTo('/')
+        break
+    }
+  }
 </script>

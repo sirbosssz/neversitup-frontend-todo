@@ -107,8 +107,8 @@ export class TodoRepository {
       id,
       title,
       description,
-      ownerId: created_by.id,
-      ownerUsername: created_by.username,
+      ownerId: created_by?.id,
+      ownerUsername: created_by?.username,
       createdAt: created_at,
       updatedAt: updated_at,
     }

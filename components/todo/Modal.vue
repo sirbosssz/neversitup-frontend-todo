@@ -1,7 +1,4 @@
 <template>
-  <div class="inset-0 flex items-center justify-center">
-    <ButtonPrimary @click="$emit('setIsOpen', true)"> Create Todo </ButtonPrimary>
-  </div>
   <TransitionRoot appear :show="isOpen" as="template">
     <Dialog as="div" @close="$emit('setIsOpen', false)" class="relative z-10">
       <TransitionChild
@@ -34,7 +31,7 @@
             >
               <div>
                 <h2 class="text-lg font-medium leading-6 text-gray-900">
-                  Create Todo
+                  {{ title }}
                 </h2>
                 <div class="mt-2">
                   <slot></slot>
@@ -60,6 +57,10 @@
     isOpen: {
       type: Boolean,
       default: false,
+    },
+    title: {
+      type: String,
+      default: 'Dialog',
     },
   })
 
