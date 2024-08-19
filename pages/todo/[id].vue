@@ -19,15 +19,21 @@
   })
 
   const route = useRoute()
-  const id = Array.isArray(route.params.id)
-    ? route.params.id[0]
-    : route.params.id
+  const id = computed(() => {
+    const id = route.params.id
+    if (typeof id == 'string') {
+      return id
+    } else {
+      return id[0]
+    }
+  })
 
   const todoRepo = new TodoRepository()
   const { data, refresh, error } = await useAsyncData(() =>
-    todoRepo.getById(id)
+    todoRepo.getById(id.value)
   )
-  if (error) {
+  if (error.value) {
+    console.error(error.value)
     navigateTo('/')
   }
   const pageMeta = computed(() => ({

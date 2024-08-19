@@ -1,4 +1,3 @@
-import { data } from 'autoprefixer'
 import type { NitroFetchRequest, $Fetch } from 'nitropack'
 
 export type Todo = {
@@ -58,18 +57,22 @@ export class TodoRepository {
   }
 
   public async getById(id: string): Promise<Todo> {
-    const { data } = await this.fetch<TodoFetchOneResponse>(
+    const { data, isSuccess } = await this.fetch<TodoFetchOneResponse>(
       `${this.API_ENDPOINT}/${id}`,
       {
         method: 'GET',
       }
     )
 
+    if (!isSuccess) {
+      throw new Error('load unsuccess')
+    }
+
     return this.transformToTodo(data)
   }
 
   public async edit(id: string, item: Todo): Promise<Todo | undefined> {
-    const { data } = await this.fetch<TodoFetchOneResponse>(
+    const { data, isSuccess } = await this.fetch<TodoFetchOneResponse>(
       `${this.API_ENDPOINT}/${id}`,
       {
         method: 'PATCH',
@@ -77,13 +80,25 @@ export class TodoRepository {
       }
     )
 
+    if (!isSuccess) {
+      throw new Error('edit not success')
+    }
+
     return this.transformToTodo(data)
   }
 
-  public async delete(id: string): Promise<TodoFetchResponse> {
-    return await this.fetch<TodoFetchResponse>(`${this.API_ENDPOINT}/${id}`, {
-      method: 'DELETE',
-    })
+  public async delete(id: string): Promise<boolean> {
+    const { isSuccess } = await this.fetch<TodoFetchResponse>(
+      `${this.API_ENDPOINT}/${id}`,
+      {
+        method: 'DELETE',
+      }
+    )
+
+    if (!isSuccess) {
+      throw new Error('edit not success')
+    }
+    return isSuccess
   }
 
   private transformToTodo(item: TodoResponse): Todo {
