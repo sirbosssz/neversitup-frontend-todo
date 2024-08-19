@@ -6,7 +6,7 @@
         :is-open="isOpenCreateModal"
         @set-is-open="setCreateModalStatus"
       >
-        <TodoFormCreate
+        <TodoForm
           @close-modal="setCreateModalStatus(false)"
           @created="refresh()"
         />
@@ -27,6 +27,22 @@
   import { TodoRepository } from '~/repository/todo'
   definePageMeta({
     middleware: ['auth'],
+  })
+
+  const pageData = reactive({
+    title: 'Todo List: Home',
+    desctiption: 'Homepage of Todo List',
+  })
+
+  useHead({
+    title: pageData.title,
+    meta: [{ name: 'description', content: pageData.desctiption }],
+  })
+  useSeoMeta({
+    title: pageData.title,
+    ogTitle: pageData.title,
+    description: pageData.desctiption,
+    ogDescription: pageData.desctiption,
   })
 
   const isOpenCreateModal = ref(false)

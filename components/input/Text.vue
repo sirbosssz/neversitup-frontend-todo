@@ -6,6 +6,7 @@
       :type="type"
       :name="name"
       :placeholder="placeholder"
+      :value="modelValue"
       :v-model="modelValue"
       :v-bind="attrs"
       @input="updateValue"

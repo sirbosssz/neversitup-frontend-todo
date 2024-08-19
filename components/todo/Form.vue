@@ -7,6 +7,7 @@
         name="title"
         type="text"
         v-model="title"
+        :attrs="titleAttrs"
       />
     </div>
     <div class="mt-2">
@@ -15,17 +16,20 @@
         placeholder="Description"
         name="description"
         v-model="description"
+        :attrs="descAttrs"
       />
     </div>
 
     <InputError :message="formError.title" />
 
-    <div class="mt-4 flex gap-3">
-      <ButtonPrimary type="submit"> Create </ButtonPrimary>
+    <div v-if="!isSubmitting" class="mt-4 flex gap-3">
+      <ButtonPrimary type="submit"> {{ submitButtonMessage }} </ButtonPrimary>
       <ButtonSecondary @click="$emit('closeModal')"> Close </ButtonSecondary>
     </div>
+    <div v-else class="mt-4 block text-center">Submitting...</div>
 
     <pre>{{ formData }}</pre>
+    <pre>{{ title }}</pre>
   </form>
 </template>
 
@@ -34,18 +38,48 @@
   import { useForm, type GenericObject } from 'vee-validate'
   import { TodoRepository, type Todo } from '~/repository/todo'
   import { useFormError } from '~/composables/form/useFormError'
+  import { TodoFormMode } from '~/enums/TodoFormMode'
 
   const emit = defineEmits(['closeModal', 'created'])
+  const props = defineProps({
+    id: { type: String, default: '' },
+    title: {
+      type: String,
+      default: '',
+    },
+    description: {
+      type: String,
+      default: '',
+    },
+    mode: {
+      type: Number as PropType<TodoFormMode>,
+      default: TodoFormMode.CREATE,
+    },
+  })
+
+  const submitButtonMessage = computed(() => {
+    switch (props.mode) {
+      case TodoFormMode.CREATE:
+        return 'Create'
+
+      case TodoFormMode.EDIT:
+        return 'Save'
+    }
+  })
 
   // form validate
-  const { defineField, handleSubmit, handleReset } = useForm({
+  const { defineField, handleSubmit, isSubmitting, setFieldValue } = useForm({
     validationSchema: object({
       title: string().required('Create todo required Titile'),
       description: string().optional(),
     }),
+    initialValues: {
+      title: props.title,
+      description: props.description,
+    },
   })
-  const [title] = defineField('title')
-  const [description] = defineField('description')
+  const [title, titleAttrs] = defineField('title')
+  const [description, descAttrs] = defineField('description')
 
   // form error
   const { formError, setFormError, resetFormError } = useFormError()
@@ -61,8 +95,17 @@
       resetFormError()
       formData.title = values.title
       formData.description = values.description ?? ''
-      await todoRepo.create(formData)
-      emit('created')
+      switch (props.mode) {
+        case TodoFormMode.CREATE:
+          await todoRepo.create(formData)
+          emit('created')
+          emit('closeModal')
+          break
+
+        case TodoFormMode.EDIT:
+          await todoRepo.edit(props.id, formData)
+          break
+      }
     },
     ({ errors }) => setFormError(errors)
   )
