@@ -1,0 +1,74 @@
+<template>
+  <div class="inset-0 flex items-center justify-center">
+    <ButtonPrimary @click="$emit('setIsOpen', true)"> Create Todo </ButtonPrimary>
+  </div>
+  <TransitionRoot appear :show="isOpen" as="template">
+    <Dialog as="div" @close="$emit('setIsOpen', false)" class="relative z-10">
+      <TransitionChild
+        as="template"
+        enter="duration-300 ease-out"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="duration-200 ease-in"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-black/25" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 overflow-y-auto">
+        <div
+          class="flex min-h-full items-center justify-center p-4 text-center"
+        >
+          <TransitionChild
+            as="template"
+            enter="duration-300 ease-out"
+            enter-from="opacity-0 scale-95"
+            enter-to="opacity-100 scale-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100 scale-100"
+            leave-to="opacity-0 scale-95"
+          >
+            <DialogPanel
+              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+            >
+              <div>
+                <h2 class="text-lg font-medium leading-6 text-gray-900">
+                  Create Todo
+                </h2>
+                <div class="mt-2">
+                  <slot></slot>
+                </div>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
+</template>
+
+<script setup lang="ts">
+  import {
+    TransitionRoot,
+    TransitionChild,
+    Dialog,
+    DialogPanel,
+  } from '@headlessui/vue'
+
+  defineProps({
+    isOpen: {
+      type: Boolean,
+      default: false,
+    },
+  })
+
+  const emit = defineEmits(['setIsOpen'])
+
+  function closeModal() {
+    emit('setIsOpen', false)
+  }
+  function openModal() {
+    emit('setIsOpen', true)
+  }
+</script>

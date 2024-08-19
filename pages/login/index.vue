@@ -1,9 +1,7 @@
 <template>
-  <main class="flex justify-center items-center w-full h-full">
+  <Container>
     <LoginForm />
-  </main>
+  </Container>
 </template>
 
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
